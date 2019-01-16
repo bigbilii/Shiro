@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+
+    <!--Web拦截器-->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!--安全认证管理器-->
+        <property name="securityManager" ref="securityManager"/>
+        <!--登录页面-->
+        <property name="loginUrl" value="/login.jsp"/>
+        <!-- 自定义的过滤器链，从上向下执行，一般将`/**`放到最下面 -->
+        <property name="filterChainDefinitions">
+            <value>
+                <!--静态资源-->
+                /static/** = anon
+                /lib/** = anon
+                /js/** = anon
+
+                <!--登录页面与请求-->
+                /login.jsp = anon
+                /login = anon
+                <!--登出-->
+                /logout = logout
+                <!--登录后可访问主页-->
+                /index.jsp = user
+                <!--所有请求-->
+                /** = user
+            </value>
+        </property>
+
+    </bean>
+
+    <!--Shiro安全管理器-->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="userRealm"/>
+    </bean>
+
+    <!--自定义Realm-->
+    <bean id="userRealm" class="com.bigbilii.realm.UserRealm">
+        <!-- 使用credentialsMatcher实现密码验证服务 -->
+        <property name="credentialsMatcher" ref="credentialsMatcher"/>
+    </bean>
+
+    <!--密码匹配过程-->
+    <bean id="credentialsMatcher" class="org.apache.shiro.authc.credential.HashedCredentialsMatcher  ">
+        <!--加密算法名称-->
+        <property name="hashAlgorithmName" value="md5"/>
+        <!--加盐次数-->
+        <property name="hashIterations" value="2"/>
+        <!--是否存储散列后的密码为16进制-->
+        <property name="storedCredentialsHexEncoded" value="true"/>
+    </bean>
+
+    <!-- Shiro生命周期处理器-->
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+</beans>

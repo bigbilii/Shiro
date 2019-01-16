@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bigbilii.mapper.UserMapper">
+
+    <!-- 根据用户名查询-->
+    <select id="findByName" parameterType="String" resultType="com.bigbilii.entity.User">
+        SELECT *
+        FROM user
+        WHERE username = #{username}
+    </select>
+
+    <insert id="insert" parameterType="com.bigbilii.entity.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user(username, password, salt)
+        VALUES (#{username}, #{password}, #{salt});
+    </insert>
+
+    <delete id="delete" parameterType="String">
+        DELETE
+        FROM user
+        WHERE username = #{username};
+    </delete>
+
+    <select id="query" resultType="com.bigbilii.entity.User">
+        SELECT *
+        FROM user;
+    </select>
+
+    <select id="findRoles" parameterType="String" resultType="com.bigbilii.entity.Role">
+        select r.id, r.name, r.description
+        from user u,
+             role r,
+             user_role ur
+        where u.username = #{username}
+          and u.id = ur.user_id
+          and r.id = ur.role_id
+    </select>
+
+    <select id="findPermissions" parameterType="String" resultType="com.bigbilii.entity.Permission">
+        select p.id, p.name, p.description
+        from permission p,
+             role r,
+             user u,
+             role_premission rp,
+             user_role ur
+        where u.username = #{username}
+          and u.id = ur.user_id
+          and r.id = ur.role_id
+          and r.id = rp.role_id
+          and p.id = rp.permission_id
+    </select>
+</mapper>
